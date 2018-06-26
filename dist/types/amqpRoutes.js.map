@@ -1,0 +1,1 @@
+{"version":3,"file":"amqpRoutes.js","sourceRoot":"","sources":["../../src/types/amqpRoutes.ts"],"names":[],"mappings":";;AAEA,IAAY,YAGX;AAHD,WAAY,YAAY;IACtB,iCAAiB,CAAA;IACjB,yDAAyC,CAAA;AAC3C,CAAC,EAHW,YAAY,GAAZ,oBAAY,KAAZ,oBAAY,QAGvB;AAED,IAAY,qBAGX;AAHD,WAAY,qBAAqB;IAC/B,2CAAkB,CAAA;IAClB,qDAA4B,CAAA;AAC9B,CAAC,EAHW,qBAAqB,GAArB,6BAAqB,KAArB,6BAAqB,QAGhC"}
