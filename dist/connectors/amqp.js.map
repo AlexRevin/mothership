@@ -1,1 +1,0 @@
-{"version":3,"file":"amqp.js","sourceRoot":"","sources":["../../src/connectors/amqp.ts"],"names":[],"mappings":";;;;;;;;;;AAAA,gCAAgC;AAEnB,QAAA,WAAW,GAAG,CAAO,GAAW,EAA8B,EAAE;IAC3E,OAAO,IAAI,CAAC,OAAO,CAAC,GAAG,CAAC,CAAC;AAC3B,CAAC,CAAA,CAAC"}

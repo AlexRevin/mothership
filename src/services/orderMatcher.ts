@@ -73,8 +73,8 @@ export class OrderMatcher {
         data: order,
       };
       return this.outgoingChannel.publish(
-        AmqpExchange.ORDERS,
-        '',
+        AmqpExchange.ORDERS_PERSISTENCE,
+        OrdersPersistenceKeys.ORDER,
         Buffer.from(JSON.stringify(message), 'utf8'),
       );
     }

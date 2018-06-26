@@ -57,10 +57,10 @@ export const orderReceiver = async ({ amqpClient }: OrderReceiverParams) => {
     order.initial_amount = order.amount;
     order.created_at = new Date();
     const stringifiedOrder = JSON.stringify(order);
-    // return channel.publish(
-    //   AmqpExchange.ORDERS,
-    //   ``,
-    //   Buffer.from(stringifiedOrder, 'utf8'),
-    // );
+    return channel.publish(
+      AmqpExchange.ORDERS,
+      ``,
+      Buffer.from(stringifiedOrder, 'utf8'),
+    );
   }
 };
