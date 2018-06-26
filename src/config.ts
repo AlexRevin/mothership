@@ -6,6 +6,6 @@ export interface ExtendedProcessEnvs extends NodeJS.ProcessEnv {
   RABBIT_URL: string;
   POSTGRES_URL: string;
   PORT: string;
-  SERVICE_NAME: 'matcher' | 'persister' | 'processor' | 'receiver' | 'transactionPersister';
+  SERVICE_NAME: 'matcher' | 'processor' | 'receiver' | 'transactionPersister';
 }
 export const config = <ExtendedProcessEnvs>process.env;

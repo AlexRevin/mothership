@@ -11,6 +11,6 @@ export enum OrdersPersistenceKeys {
 }
 
 export interface OrdersPersistenceMessage {
-  OpType: 'CLOSE' | 'UPDATE';
+  OpType: 'NEW'| 'CLOSE' | 'UPDATE';
   data: Partial<Order>;
 }

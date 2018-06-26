@@ -1,7 +1,7 @@
 
 exports.up = async (knex, Promise) => {
   await knex.schema.createTable('order_list', function (table) {
-    table.uuid('id').primary();
+    table.uuid('id').notNull();
     table.string('type', 4);
     table.integer('price');
     table.integer('amount');

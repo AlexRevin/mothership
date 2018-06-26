@@ -1,13 +1,10 @@
-import * as Knex from 'knex';
 import { Channel } from 'amqplib';
-import { OrderReceiverParams } from './orderReceiver';
-import { AmqpExchange, OrdersPersistenceKeys, OrdersPersistenceMessage } from '../types/amqpRoutes';
-import { Order } from '../types/order';
-import { OrderPersisterParams } from './orderPersister';
+import { AmqpExchange, OrdersPersistenceKeys } from '../types/amqpRoutes';
 import { OrderTransaction, OrderTransactionRow } from '../types/orderTransaction';
 import { EventEmitter } from 'events';
+import { OrderProcessorParams } from './orderProcessor';
 
-export interface OrderTransactionPersisterParams extends OrderPersisterParams {}
+export interface OrderTransactionPersisterParams extends OrderProcessorParams {}
 
 export const orderTransactionPersister = async (
   { db, amqpClient }: OrderTransactionPersisterParams,

@@ -47,10 +47,10 @@ export class OrderMatcher {
     await this.incomingChannel.prefetch(100);
     await this.incomingChannel.consume(queue.queue, async (msg) => {
       try {
-        const order: Partial<Order> = JSON.parse(msg.content.toString());
-        order.created_at = new Date(order.created_at);
-        // console.log('matcher: ', order.id);
-        await this.processOrder(order);
+        const { data }: Partial<OrdersPersistenceMessage> = JSON.parse(msg.content.toString());
+        console.log('matcher: ', data.id);
+        data.created_at = new Date(data.created_at);
+        await this.processOrder(data);
         this.incomingChannel.ack(msg);
       } catch (e) {
         console.log(e);
@@ -60,6 +60,7 @@ export class OrderMatcher {
 
   public closeOrder(order: Partial<Order>) {
     order.closed_at = new Date();
+    order.updated_at = null;
     order.status = OrderStatus.COMPLETED;
     order.amount = 0;
     this.removeInMemOrder(order);
@@ -79,9 +80,12 @@ export class OrderMatcher {
       );
     }
   }
-
   public updateOrder(order: Partial<Order>) {
+    if (order.status === OrderStatus.COMPLETED) {
+      return;
+    }
     // console.log('matcher -> persistence (update): ', order.id);
+    order.updated_at = new Date();
     if (this.mode === 'emitter') {
       this.transactionEmitter.emit(TransactionEmitterEvents.UPDATED, order);
     } else {
@@ -155,24 +159,19 @@ export class OrderMatcher {
               return;
             }
             if (buyOrder.amount === order.amount) {
-              // console.log('      buy = sell');
               this.processTransaction({
                 buyer: buyOrder, seller: order, amount: buyOrder.amount,
               });
-              // console.log('      buy = sell: transaction');
               this.closeOrder(order);
               this.closeOrder(buyOrder);
               return;
             }
             if (buyOrder.amount < order.amount) {
-              // console.log('      buy < sell');
               order.amount = order.amount - buyOrder.amount;
               this.processTransaction({
                 buyer: buyOrder, seller: order, amount: buyOrder.amount,
               });
-              // console.log('      buy > sell : transaction');
               this.closeOrder(buyOrder);
-              // console.log('      buy > sell : close');
             }
           }
         }
@@ -180,8 +179,10 @@ export class OrderMatcher {
     }
     if (order.amount > 0) {
       order.status = OrderStatus.NEW;
-      this.updateOrder(order);
       this.persistInMemOrder(order);
+      if (order.amount !== order.initial_amount) {
+        this.updateOrder(order);
+      }
     }
   }
 

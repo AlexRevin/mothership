@@ -7,11 +7,11 @@
 // - Storing the entry to hot cache if clients would need order listings
 
 import * as Knex from 'knex';
-import { OrderType, Order, OrderStatus } from '../types/order';
 import { OrderReceiverParams } from './orderReceiver';
 import { EventEmitter } from 'events';
 import { Channel } from 'amqplib';
-import { AmqpExchange } from '../types/amqpRoutes';
+import { AmqpExchange, OrdersPersistenceKeys, OrdersPersistenceMessage } from '../types/amqpRoutes';
+import { Order } from '../types/order';
 
 export interface OrderProcessorParams extends OrderReceiverParams {
   db: Knex;
@@ -28,11 +28,17 @@ export const orderProcessor = async ({ amqpClient, db }: OrderProcessorParams) =
     channel = await amqpClient.createChannel();
     const queue = await channel.assertQueue('processor', { exclusive: true });
     await channel.bindQueue(queue.queue, AmqpExchange.ORDERS, '');
+    await channel.bindQueue(
+      queue.queue,
+      AmqpExchange.ORDERS_PERSISTENCE,
+      OrdersPersistenceKeys.ORDER,
+    );
     await channel.prefetch(100);
     await channel.consume(queue.queue, async (msg) => {
       try {
-        const order: Partial<Order> = JSON.parse(msg.content.toString());
-        ordersStack.push(order);
+        const orderMessage: Partial<OrdersPersistenceMessage> = JSON.parse(msg.content.toString());
+        console.log('received: ', orderMessage.data.id);
+        ordersStack.push(orderMessage.data);
         channel.ack(msg);
       } catch (e) {
         console.log(e);
@@ -65,7 +71,6 @@ export const orderProcessor = async ({ amqpClient, db }: OrderProcessorParams) =
     }
   }
 
-  // TODO: we might not need to return order from here
   async function persistOrders({ orders }: { orders: Partial<Order>[] }) {
     try {
       return db.batchInsert('order_list', orders);

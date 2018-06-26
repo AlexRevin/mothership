@@ -4,7 +4,6 @@ import { config } from './config';
 import { connectDatabase } from './connectors/database';
 import { OrderMatcher } from './services/orderMatcher';
 import { Connection } from 'amqplib';
-import { orderPersister } from './services/orderPersister';
 import { orderProcessor } from './services/orderProcessor';
 import { orderReceiver } from './services/orderReceiver';
 import { orderTransactionPersister } from './services/orderTransactionPersister';
@@ -19,7 +18,6 @@ const services = ({ amqpClient, db }: ServiceParams) => {
       const matcher = new OrderMatcher({ amqpClient, mode: 'amqp' });
       await matcher.startService();
     },
-    persister: async () => orderPersister({ db, amqpClient }),
     processor: async () => {
       orderProcessor({ amqpClient, db }).then(processor => processor.startProcessing());
     },
