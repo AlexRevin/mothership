@@ -47,9 +47,9 @@ Processor gets messages from Receiver and Matcher and performs bulk insert into 
 
 `closed_at`  - order was completed
 
-## Transaction Processor
+## Transaction Persister
 
-Transaction processor receives closed order transactions from `matcher` and puts them into database
+Transaction persister receives closed order transactions from `matcher` and puts them into database
 
 
 # Setup
@@ -62,6 +62,28 @@ docker run -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
 ```
 
 You might also have to modify default variables in dotenv configuration file `.env` in the project root
+
+# Benchmarking and running
+
+Before running services you need to have `knex` database migrations been run with
+```
+npm run migrate
+```
+
+Starting all services can be done with npm commands:
+```
+npm run start:receiver
+npm run start:matcher
+npm run start:processor
+npm run start:transaction_persister
+```
+
+You can use `Apache Benchmark` to test web-endpoint performance, there are request fixtures provided for that:
+
+```
+ab -p fixtures/buy_order.json -T application/json -c 10 -n 2000 http://localhost:8080/
+ab -p fixtures/buy_order.json -T application/json -c 10 -n 2000 http://localhost:8080/
+```
 
 # Develepoment
 
