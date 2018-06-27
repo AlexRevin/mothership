@@ -4,9 +4,14 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "npm run build && node dist/index.js",
+        "start:processor": "SERVICE_NAME=processor node dist/index.js",
+        "start:receiver": "SERVICE_NAME=receiver node dist/index.js",
+        "start:matcher": "SERVICE_NAME=matcher node dist/index.js",
+        "start:transaction_persister": "SERVICE_NAME=transactionPersister node dist/index.js",
+        "migrate": "knex migrate:latest",
         "build": "rimraf ./dist/ && npm run tslint && tsc",
-        "tslint": "tslint -c tslint.json -p ."
+        "tslint": "tslint -c tslint.json -p .",
+        "test": "jest --runInBand src/test/"
     },
     "author": "Alex R",
     "license": "ISC",
