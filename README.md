@@ -86,5 +86,11 @@ ab -p fixtures/buy_order.json -T application/json -c 10 -n 2000 http://localhost
 ```
 
 # Develepoment
+Project can be built to vanilla JS from Typescript with `npm run build`
 
+All files are styled accoring to `AirBnb code styleguide` and checked with linter `ts-lint`. All files are checked with it on `build` stage.
+
+Project is transpiled to vanilla JS from typescript with `npm run build`
+
+Tests are run with:
 `npm test`
