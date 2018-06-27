@@ -61,6 +61,7 @@ describe('Matcher', () => {
 
   it('should bulk process', (done) => {
     let transactionCounter = 0;
+    console.log('hitting 1000 + 1000 buy/sell request together');
     const timeCounter = +new Date();
     matcher.transactionEmitter.on(TransactionEmitterEvents.CLOSED, () => {
       transactionCounter += 1;
