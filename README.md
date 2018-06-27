@@ -6,7 +6,7 @@ The system consists of 4 services:
 * receiver
 * matcher
 * processor
-* transactionProcessor
+* transactionPersister
 
 ## Receiver
 
