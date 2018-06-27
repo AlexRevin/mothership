@@ -1,7 +1,6 @@
-import { config } from './../config';
 // This service implements the following strategy:
 // - Puts the order to the processing queue
-
+import { config } from './../config';
 import * as amqp from 'amqplib';
 import * as uuid from 'uuid';
 import * as express from 'express';
@@ -15,7 +14,6 @@ export interface OrderReceiverParams {
 export const orderReceiver = async ({ amqpClient }: OrderReceiverParams) => {
   const channel = await amqpClient.createChannel();
   await channel.assertExchange(AmqpExchange.ORDERS, 'fanout');
-  console.log('receiver started');
 
   const app = express();
   app.use(bodyParser.json());

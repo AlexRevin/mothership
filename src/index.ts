@@ -1,9 +1,9 @@
 import * as Knex from 'knex';
+import { Connection } from 'amqplib';
 import { connectAmqp } from './connectors/amqp';
 import { config } from './config';
 import { connectDatabase } from './connectors/database';
 import { OrderMatcher } from './services/orderMatcher';
-import { Connection } from 'amqplib';
 import { orderProcessor } from './services/orderProcessor';
 import { orderReceiver } from './services/orderReceiver';
 import { orderTransactionPersister } from './services/orderTransactionPersister';

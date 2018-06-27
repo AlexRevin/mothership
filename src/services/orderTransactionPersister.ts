@@ -1,7 +1,7 @@
 import { Channel } from 'amqplib';
+import { EventEmitter } from 'events';
 import { AmqpExchange, OrdersPersistenceKeys } from '../types/amqpRoutes';
 import { OrderTransaction, OrderTransactionRow } from '../types/orderTransaction';
-import { EventEmitter } from 'events';
 import { OrderProcessorParams } from './orderProcessor';
 
 export interface OrderTransactionPersisterParams extends OrderProcessorParams {}
@@ -10,7 +10,7 @@ export const orderTransactionPersister = async (
   { db, amqpClient }: OrderTransactionPersisterParams,
 ) => {
   const orderTransactionStack: OrderTransactionRow[] = [];
-  const emitter = new EventEmitter();
+  const emitter = new EventEmitter(); // TODO: remove, will leak
   let channel: Channel;
 
   batchPoller();
@@ -28,7 +28,6 @@ export const orderTransactionPersister = async (
       const { buyer, seller, amount, price, time }: OrderTransaction =
         JSON.parse(msg.content.toString());
 
-      console.log(`transaction: ${seller.id} -> ${buyer.id}`);
       orderTransactionStack.push({
         amount, price, time,
         buyer: buyer.id,

@@ -1,8 +1,8 @@
-import { OrderType, OrderStatus } from './../types/order';
-import { OrderReceiverParams } from './orderReceiver';
 import * as amqp from 'amqplib';
 import { EventEmitter } from 'events';
-import { Order } from '../types/order';
+
+import { OrderType, OrderStatus, Order } from './../types/order';
+import { OrderReceiverParams } from './orderReceiver';
 import { createInMemOrderStorage } from '../types/inMemOrderStorage';
 import { OrderTransaction } from '../types/orderTransaction';
 import { AmqpExchange, OrdersPersistenceMessage, OrdersPersistenceKeys } from '../types/amqpRoutes';
@@ -48,7 +48,6 @@ export class OrderMatcher {
     await this.incomingChannel.consume(queue.queue, async (msg) => {
       try {
         const { data }: Partial<OrdersPersistenceMessage> = JSON.parse(msg.content.toString());
-        console.log('matcher: ', data.id);
         data.created_at = new Date(data.created_at);
         await this.processOrder(data);
         this.incomingChannel.ack(msg);
@@ -64,7 +63,6 @@ export class OrderMatcher {
     order.status = OrderStatus.COMPLETED;
     order.amount = 0;
     this.removeInMemOrder(order);
-    // console.log('matcher -> persistence (close): ', order.id);
 
     if (this.mode === 'emitter') {
       this.transactionEmitter.emit(TransactionEmitterEvents.CLOSED, order);
@@ -130,31 +128,26 @@ export class OrderMatcher {
   public processSellOrder(order: Partial<Order>) {
     order.status = OrderStatus.PROCESSING;
     while (true) {
-      // console.log('loop');
       const item = this.buyOrderStorage.maximum();
       if (!item) {
         break;
       }
-      // console.log('  found item');
       if (item.price < order.price) {
         break;
       }
-      // console.log('  processing item');
       while (!item.data.isEmpty()) {
         const minimumTimed = item.data.minimum();
-        // console.log('    found minimum timed: ', minimumTimed.data.size);
         for (const buyOrder of minimumTimed.data.values()) {
           // threadsafe kinda
           if (buyOrder.status === OrderStatus.NEW) {
             buyOrder.status = OrderStatus.PROCESSING;
             if (buyOrder.amount > order.amount) {
               buyOrder.amount = buyOrder.amount - order.amount;
+              buyOrder.status = OrderStatus.NEW;
               this.processTransaction({
                 buyer: buyOrder, seller: order, amount: order.amount,
               });
               this.closeOrder(order);
-              // console.log('      buy > sell');
-              buyOrder.status = OrderStatus.NEW;
               this.updateOrder(buyOrder);
               return;
             }
@@ -198,7 +191,6 @@ export class OrderMatcher {
         break;
       }
       while (!item.data.isEmpty()) {
-        // time sorted
         const minimumTimed = item.data.minimum();
         for (const sellOrder of minimumTimed.data.values()) {
           // threadsafe kinda
@@ -206,11 +198,11 @@ export class OrderMatcher {
             sellOrder.status = OrderStatus.PROCESSING;
             if (sellOrder.amount > order.amount) {
               sellOrder.amount = sellOrder.amount - order.amount;
+              sellOrder.status = OrderStatus.NEW;
               this.processTransaction({
                 buyer: order, seller: sellOrder, amount: order.amount,
               });
               this.closeOrder(order);
-              sellOrder.status = OrderStatus.NEW;
               this.updateOrder(sellOrder);
               return;
             }

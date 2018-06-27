@@ -1,15 +1,15 @@
 // This service implements the following strategy:
 // - Reads the order from the processing queue
 // - Persists it to database
-// - Sends it to the OrderBook processor
 
 // What could be implemented, but not essential:
 // - Storing the entry to hot cache if clients would need order listings
 
 import * as Knex from 'knex';
-import { OrderReceiverParams } from './orderReceiver';
 import { EventEmitter } from 'events';
 import { Channel } from 'amqplib';
+
+import { OrderReceiverParams } from './orderReceiver';
 import { AmqpExchange, OrdersPersistenceKeys, OrdersPersistenceMessage } from '../types/amqpRoutes';
 import { Order } from '../types/order';
 
@@ -19,7 +19,7 @@ export interface OrderProcessorParams extends OrderReceiverParams {
 
 export const orderProcessor = async ({ amqpClient, db }: OrderProcessorParams) => {
 
-  const emitter = new EventEmitter();
+  const emitter = new EventEmitter(); // TODO: remove, it can leak
   const ordersStack: Partial<Order>[] = [];
   let channel: Channel;
 
@@ -37,7 +37,6 @@ export const orderProcessor = async ({ amqpClient, db }: OrderProcessorParams) =
     await channel.consume(queue.queue, async (msg) => {
       try {
         const orderMessage: Partial<OrdersPersistenceMessage> = JSON.parse(msg.content.toString());
-        console.log('received: ', orderMessage.data.id);
         ordersStack.push(orderMessage.data);
         channel.ack(msg);
       } catch (e) {
@@ -49,7 +48,6 @@ export const orderProcessor = async ({ amqpClient, db }: OrderProcessorParams) =
   async function batchPoller() {
     const orders = ordersStack.splice(0, 100);
     if (orders.length) {
-      console.log('processing orders with ids: ', orders.map(o => o.id));
       await persistOrders({ orders });
       orders.map(o => emitter.emit('order_persisted', o));
     }
